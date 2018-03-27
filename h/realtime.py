@@ -86,12 +86,13 @@ class Consumer(ConsumerMixin):
         if 'timestamp' not in message.headers:
             return
 
-        timestamp = datetime.strptime(message.headers['timestamp'],
-                                      '%Y-%m-%dT%H:%M:%S.%fZ')
-        delta = datetime.utcnow() - timestamp
-        delta_millis = int(delta.total_seconds() * 1000)
+        if self.statsd_client is not None:
+            timestamp = datetime.strptime(message.headers['timestamp'],
+                                          '%Y-%m-%dT%H:%M:%S.%fZ')
+            delta = datetime.utcnow() - timestamp
+            delta_millis = int(delta.total_seconds() * 1000)
 
-        self.statsd_client.timing('streamer.msg.queueing', delta_millis)
+            self.statsd_client.timing('streamer.msg.queueing', delta_millis)
 
 
 class Publisher(object):
